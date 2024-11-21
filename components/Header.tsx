@@ -76,7 +76,7 @@ export const Header = () => {
         <Link href="/" passHref className="items-center hidden gap-2 ml-4 mr-6 lg:flex shrink-0">
           <div className="relative flex w-10 h-10">
             <Image
-              alt="SE2 logo"
+              alt="Logo"
               className="cursor-pointer"
               fill
               src={
