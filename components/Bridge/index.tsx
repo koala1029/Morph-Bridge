@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import AlertModal from "../alertModal";
 import { InputBase } from "../scaffold-eth";
 import BridgeButton from "./BridgeButton";
 import NetworksSelectBoxIn from "./NetworkSelectBoxIn";
@@ -9,7 +8,6 @@ import TokenSelectBoxOut from "./TokenSelectBoxOut";
 import { NUMBER_REGEX, chainDatas } from "./utils";
 import { ethers } from "ethers";
 import { useNetwork } from "wagmi";
-import { enabledChains } from "~~/services/web3/wagmiConnectors";
 
 export interface TokenInfo {
   chainId: number;
@@ -70,6 +68,10 @@ const Bridge2 = () => {
           method: "wallet_switchEthereumChain",
           params: [{ chainId: targetChainId }],
         });
+        setValue(prevState => ({
+          ...prevState,
+          networkIn: networkId,
+        }));
         console.log("Successfully switched to the target chain.");
       } catch (switchError) {
         //   // If the chain is not added, add it
@@ -80,6 +82,10 @@ const Bridge2 = () => {
               method: "wallet_addEthereumChain",
               params: [chainDatas[networkId.toString()]],
             });
+            setValue(prevState => ({
+              ...prevState,
+              networkIn: networkId,
+            }));
             console.log("Chain added and switched successfully.");
           } catch (addError) {
             console.error("Failed to add the chain:", addError);
@@ -90,29 +96,6 @@ const Bridge2 = () => {
       }
       console.log("chain changed");
     }
-
-    if (isnetWorkIn && networkId == value.networkOut) {
-      const prevNetworkIn = value.networkIn;
-      setValue(prevState => ({
-        ...prevState,
-        networkIn: networkId,
-        networkOut: prevNetworkIn,
-        token: null,
-      }));
-      return;
-    }
-
-    isnetWorkIn
-      ? setValue(prevState => ({
-          ...prevState,
-          networkIn: networkId,
-          // token: null,
-        }))
-      : setValue(prevState => ({
-          ...prevState,
-          networkOut: networkId,
-          // token: null,
-        }));
   };
 
   useEffect(() => {

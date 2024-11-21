@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { Appstate, TokenInfo } from ".";
-import { ImageMap, bridge_chains_data, image_map, networkname_map } from "./utils";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { getTokens } from "~~/utils/lifi";
 
@@ -11,20 +10,24 @@ export interface extendprops {
 
 const TokenSelectBoxIn: React.FC<Omit<Appstate, "tokenAmount"> & extendprops> = ({ networkIn, token, setterFun }) => {
   const [tokenlist, setTokenList] = useState<TokenInfo[]>([]);
-  const getData = async (network: number) => {
-    const tokens = (await getTokens(network)).tokens[network.toString()];
-    if (tokens.length > 1) {
-      setTokenList(tokens.slice(0, 1));
-    } else {
-      setTokenList(tokens);
-    }
-    if (token == null) {
-      setterFun(tokens[0]);
-    }
-  };
+  const getData = useCallback(
+    async (network: number) => {
+      const tokens = (await getTokens(network)).tokens[network.toString()];
+      if (tokens.length > 1) {
+        setTokenList(tokens.slice(0, 1));
+      } else {
+        setTokenList(tokens);
+      }
+      if (token == null) {
+        setterFun(tokens[0]);
+      }
+    },
+    [token, setterFun],
+  );
+
   useEffect(() => {
     getData(networkIn);
-  }, [networkIn, token]);
+  }, [networkIn, getData]);
   return (
     <div>
       <p>Token</p>

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -6,12 +6,10 @@ import { useRouter } from "next/router";
 /**
  * Site header
  */
-import logo from "../public/logo.png";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 // BugAntIcon
-import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
-import { useOutsideClick } from "~~/hooks/scaffold-eth";
+import { FaucetButton } from "~~/components/scaffold-eth";
 
 interface HeaderMenuLink {
   label: string;
@@ -60,10 +58,6 @@ export const HeaderMenuLinks = () => {
 export const Header = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const burgerMenuRef = useRef<HTMLDivElement>(null);
-  useOutsideClick(
-    burgerMenuRef,
-    useCallback(() => setIsDrawerOpen(false), []),
-  );
 
   return (
     <div className="sticky top-0 z-20 justify-between flex-shrink-0 min-h-0 px-0 shadow-md lg:static navbar bg-base-100 shadow-secondary sm:px-2">

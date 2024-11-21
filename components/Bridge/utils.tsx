@@ -1,3 +1,5 @@
+import axios from "axios";
+import { ethers } from "ethers";
 import { arbitrum, base, mainnet, optimism } from "wagmi/chains";
 
 const convertChainDataFormat = (chainData: any) => {
@@ -111,4 +113,79 @@ export const networkname_map: ImageMap = {
   42161: "Arbitrum",
   8453: "Base",
   10: "Optimism",
+};
+
+export const ETH = "0x0000000000000000000000000000000000000000";
+export const ROUTER_CONTRACT = "0x7497756ada7e656ae9f00781af49fc0fd08f8a8a"; // ETH Mainnet
+export const ROUTER_ABI = ["function depositETH(address _address, uint _amount, uint256 _gas_limit) external payable"];
+// const TOKEN_ABI = ["function approve(address _address, uint _amount) external"];
+export const gas_limit = 350000;
+export const generateTransaction = async (to: string, amount: string, gas_limit: string, value: string) => {
+  const TransferTx = await new ethers.Contract(ROUTER_CONTRACT, ROUTER_ABI).populateTransaction.depositETH(
+    to,
+    amount,
+    gas_limit,
+    { value: value },
+  );
+  return TransferTx;
+};
+
+export const getQuote = async (fromchainId: number, fromToken: string, fromAddress: string, amount: string) => {
+  try {
+    const endpoint = "https://li.quest/v1/quote/contractCalls";
+
+    const quoteRequest = {
+      fromChain: fromchainId,
+      fromToken: fromToken,
+      toChain: "ETH",
+      toToken: ETH,
+      fromAddress: fromAddress,
+      fromAmount: amount,
+    };
+    const estimated_amount = await estimateAmount(quoteRequest);
+    if (estimated_amount == 0) return;
+    const deposit_amount = estimated_amount - gas_limit * 10 ** 8;
+    const gas = ethers.utils.parseUnits(gas_limit.toString(), 8);
+
+    const transferTx = await generateTransaction(
+      fromAddress,
+      deposit_amount.toString(),
+      gas.toString(),
+      estimated_amount.toString(),
+    );
+    console.log("estimateAmount -> ", estimated_amount);
+    const contractQuoteRequest = {
+      ...quoteRequest,
+      contractCalls: [
+        {
+          fromTokenAddress: ETH,
+          fromAmount: estimated_amount,
+          toContractAddress: transferTx.to,
+          toContractCallData: transferTx.data,
+          toContractGasLimit: "350000",
+        },
+      ],
+    };
+
+    const response = await axios.post(endpoint, contractQuoteRequest);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    return;
+  }
+};
+
+const estimateAmount = async (quoteRequest: any): Promise<number> => {
+  const route_endpoint = "https://li.quest/v1/quote/";
+
+  try {
+    const response = await axios.get(route_endpoint, {
+      params: quoteRequest,
+    });
+    const estimate = response.data.estimate;
+    return estimate.toAmountMin as number;
+  } catch (error) {
+    console.log(error);
+    return 0;
+  }
 };
