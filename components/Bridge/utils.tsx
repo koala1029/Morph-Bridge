@@ -167,7 +167,7 @@ export const getQuote = async (fromchainId: number, fromToken: string, fromAddre
           fromAmount: estimated_amount,
           toContractAddress: transferTx.to,
           toContractCallData: transferTx.data,
-          toContractGasLimit: "700000",
+          toContractGasLimit: "900000",
         },
       ],
     };
