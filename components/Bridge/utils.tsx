@@ -119,7 +119,7 @@ export const ETH = "0x0000000000000000000000000000000000000000";
 export const ROUTER_CONTRACT = "0x7497756ada7e656ae9f00781af49fc0fd08f8a8a"; // ETH Mainnet
 export const ROUTER_ABI = ["function depositETH(address _address, uint _amount, uint256 _gas_limit) external payable"];
 // const TOKEN_ABI = ["function approve(address _address, uint _amount) external"];
-export const gas_limit = 500000;
+export const gas_limit = 350000;
 export const generateTransaction = async (to: string, amount: string, gas_limit: string, value: string) => {
   const TransferTx = await new ethers.Contract(ROUTER_CONTRACT, ROUTER_ABI).populateTransaction.depositETH(
     to,
@@ -144,7 +144,7 @@ export const getQuote = async (fromchainId: number, fromToken: string, fromAddre
     };
     const estimated_amount = await estimateAmount(quoteRequest);
     if (estimated_amount == 0) return;
-    const deposit_amount = estimated_amount - gas_limit * 10 ** 8;
+    const deposit_amount = estimated_amount - (gas_limit + 100000) * 10 ** 8;
 
     const transferTx = await generateTransaction(
       fromAddress,
@@ -167,7 +167,7 @@ export const getQuote = async (fromchainId: number, fromToken: string, fromAddre
           fromAmount: estimated_amount,
           toContractAddress: transferTx.to,
           toContractCallData: transferTx.data,
-          toContractGasLimit: "500000",
+          toContractGasLimit: "700000",
         },
       ],
     };
